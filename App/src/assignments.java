@@ -1,37 +1,30 @@
 import java.util.*;
 
-class TokenBucket {
-    int tokens;
+class Autocomplete {
 
-    TokenBucket(int tokens) {
-        this.tokens = tokens;
+    HashMap<String,Integer> freq = new HashMap<>();
+
+    void addQuery(String query){
+        freq.put(query,freq.getOrDefault(query,0)+1);
     }
-}
 
-class RateLimiter {
+    void search(String prefix){
 
-    HashMap<String,TokenBucket> clients = new HashMap<>();
-    int limit = 5;
+        for(String q:freq.keySet()){
 
-    boolean checkRateLimit(String client){
-
-        clients.putIfAbsent(client,new TokenBucket(limit));
-
-        TokenBucket bucket = clients.get(client);
-
-        if(bucket.tokens>0){
-            bucket.tokens--;
-            return true;
+            if(q.startsWith(prefix))
+                System.out.println(q+" -> "+freq.get(q));
         }
-
-        return false;
     }
 
     public static void main(String[] args){
 
-        RateLimiter r = new RateLimiter();
+        Autocomplete a = new Autocomplete();
 
-        for(int i=1;i<=7;i++)
-            System.out.println("Request "+i+" : "+r.checkRateLimit("client1"));
+        a.addQuery("java tutorial");
+        a.addQuery("javascript guide");
+        a.addQuery("java download");
+
+        a.search("jav");
     }
 }
