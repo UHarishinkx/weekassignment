@@ -1,32 +1,37 @@
 import java.util.*;
 
-class Analytics {
+class TokenBucket {
+    int tokens;
 
-    HashMap<String,Integer> pageViews = new HashMap<>();
-    HashMap<String,Set<String>> uniqueVisitors = new HashMap<>();
-
-    void processEvent(String url,String user){
-
-        pageViews.put(url,pageViews.getOrDefault(url,0)+1);
-
-        uniqueVisitors.putIfAbsent(url,new HashSet<>());
-        uniqueVisitors.get(url).add(user);
+    TokenBucket(int tokens) {
+        this.tokens = tokens;
     }
+}
 
-    void dashboard(){
+class RateLimiter {
 
-        System.out.println("Page Views: "+pageViews);
-        System.out.println("Unique Visitors: "+uniqueVisitors);
+    HashMap<String,TokenBucket> clients = new HashMap<>();
+    int limit = 5;
+
+    boolean checkRateLimit(String client){
+
+        clients.putIfAbsent(client,new TokenBucket(limit));
+
+        TokenBucket bucket = clients.get(client);
+
+        if(bucket.tokens>0){
+            bucket.tokens--;
+            return true;
+        }
+
+        return false;
     }
 
     public static void main(String[] args){
 
-        Analytics a = new Analytics();
+        RateLimiter r = new RateLimiter();
 
-        a.processEvent("/news","user1");
-        a.processEvent("/news","user2");
-        a.processEvent("/sports","user3");
-
-        a.dashboard();
+        for(int i=1;i<=7;i++)
+            System.out.println("Request "+i+" : "+r.checkRateLimit("client1"));
     }
 }
