@@ -1,39 +1,45 @@
 import java.util.*;
 
-class DNSEntry {
-    String ip;
-    long expiry;
+class PlagiarismDetector {
 
-    DNSEntry(String ip, long ttl) {
-        this.ip = ip;
-        this.expiry = System.currentTimeMillis() + ttl;
+    HashMap<String, Set<String>> index = new HashMap<>();
+
+    void indexDocument(String docId, String text) {
+
+        String[] words = text.split(" ");
+
+        for (int i = 0; i < words.length - 2; i++) {
+
+            String gram = words[i] + " " + words[i+1] + " " + words[i+2];
+
+            index.putIfAbsent(gram, new HashSet<>());
+            index.get(gram).add(docId);
+        }
     }
-}
 
-class DNSCache {
+    int checkSimilarity(String text) {
 
-    HashMap<String, DNSEntry> cache = new HashMap<>();
+        String[] words = text.split(" ");
+        int matches = 0;
 
-    String resolve(String domain) {
+        for (int i = 0; i < words.length - 2; i++) {
 
-        if (cache.containsKey(domain)) {
-            DNSEntry entry = cache.get(domain);
+            String gram = words[i] + " " + words[i+1] + " " + words[i+2];
 
-            if (System.currentTimeMillis() < entry.expiry)
-                return "Cache HIT: " + entry.ip;
+            if (index.containsKey(gram))
+                matches++;
         }
 
-        String ip = "172.217.14.206";
-        cache.put(domain, new DNSEntry(ip, 5000));
-
-        return "Cache MISS: " + ip;
+        return matches;
     }
 
     public static void main(String[] args) {
 
-        DNSCache dns = new DNSCache();
+        PlagiarismDetector p = new PlagiarismDetector();
 
-        System.out.println(dns.resolve("google.com"));
-        System.out.println(dns.resolve("google.com"));
+        p.indexDocument("doc1", "this is a sample plagiarism test");
+
+        System.out.println("Matching n-grams: " +
+                p.checkSimilarity("this is a sample test"));
     }
 }
