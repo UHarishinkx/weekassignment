@@ -1,37 +1,54 @@
 import java.util.*;
 
-class UsernameChecker {
+class InventoryManager {
 
-    HashMap<String, Integer> users = new HashMap<>();
-    HashMap<String, Integer> attempts = new HashMap<>();
+    HashMap<String, Integer> stock = new HashMap<>();
+    HashMap<String, Queue<Integer>> waitingList = new HashMap<>();
 
-    public boolean checkAvailability(String username) {
-        attempts.put(username, attempts.getOrDefault(username, 0) + 1);
-        return !users.containsKey(username);
+    public void addProduct(String productId, int quantity) {
+        stock.put(productId, quantity);
+        waitingList.put(productId, new LinkedList<>());
     }
 
-    public void register(String username, int userId) {
-        users.put(username, userId);
+    public synchronized String purchaseItem(String productId, int userId) {
+
+        if (!stock.containsKey(productId)) {
+            return "Product not found";
+        }
+
+        int currentStock = stock.get(productId);
+
+        if (currentStock > 0) {
+            stock.put(productId, currentStock - 1);
+            return "Success, remaining: " + (currentStock - 1);
+        }
+
+        waitingList.get(productId).add(userId);
+        return "Added to waiting list, position: " + waitingList.get(productId).size();
     }
 
-    public List<String> suggestAlternatives(String username) {
-        List<String> list = new ArrayList<>();
-        list.add(username + "1");
-        list.add(username + "2");
-        list.add(username.replace("_", "."));
-        return list;
-    }
+    public int checkStock(String productId) {
 
-    public String getMostAttempted() {
-        return Collections.max(attempts.entrySet(), Map.Entry.comparingByValue()).getKey();
+        if (!stock.containsKey(productId)) {
+            return 0;
+        }
+
+        return stock.get(productId);
     }
 
     public static void main(String[] args) {
-        UsernameChecker u = new UsernameChecker();
-        u.register("john_doe",1);
 
-        System.out.println(u.checkAvailability("john_doe"));
-        System.out.println(u.checkAvailability("jane_smith"));
-        System.out.println(u.suggestAlternatives("john_doe"));
+        InventoryManager manager = new InventoryManager();
+
+        manager.addProduct("IPHONE15_256GB", 3);
+
+        System.out.println("Stock: " + manager.checkStock("IPHONE15_256GB"));
+
+        System.out.println(manager.purchaseItem("IPHONE15_256GB", 101));
+        System.out.println(manager.purchaseItem("IPHONE15_256GB", 102));
+        System.out.println(manager.purchaseItem("IPHONE15_256GB", 103));
+        System.out.println(manager.purchaseItem("IPHONE15_256GB", 104));
+
+        System.out.println("Remaining stock: " + manager.checkStock("IPHONE15_256GB"));
     }
 }
