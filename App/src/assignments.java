@@ -1,30 +1,30 @@
 import java.util.*;
 
-class ParkingLot {
+class TwoSum {
 
-    String[] table = new String[10];
+    static int[] findTwoSum(int[] nums,int target){
 
-    int hash(String plate){
-        return Math.abs(plate.hashCode()) % table.length;
-    }
+        HashMap<Integer,Integer> map=new HashMap<>();
 
-    void parkVehicle(String plate){
+        for(int i=0;i<nums.length;i++){
 
-        int index = hash(plate);
+            int complement=target-nums[i];
 
-        while(table[index]!=null)
-            index=(index+1)%table.length;
+            if(map.containsKey(complement))
+                return new int[]{map.get(complement),i};
 
-        table[index]=plate;
+            map.put(nums[i],i);
+        }
 
-        System.out.println("Vehicle parked at spot "+index);
+        return new int[]{-1,-1};
     }
 
     public static void main(String[] args){
 
-        ParkingLot p = new ParkingLot();
+        int nums[]={2,7,11,15};
 
-        p.parkVehicle("ABC123");
-        p.parkVehicle("XYZ999");
+        int[] res=findTwoSum(nums,9);
+
+        System.out.println(res[0]+" "+res[1]);
     }
 }
