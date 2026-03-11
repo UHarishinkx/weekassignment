@@ -1,45 +1,32 @@
 import java.util.*;
 
-class PlagiarismDetector {
+class Analytics {
 
-    HashMap<String, Set<String>> index = new HashMap<>();
+    HashMap<String,Integer> pageViews = new HashMap<>();
+    HashMap<String,Set<String>> uniqueVisitors = new HashMap<>();
 
-    void indexDocument(String docId, String text) {
+    void processEvent(String url,String user){
 
-        String[] words = text.split(" ");
+        pageViews.put(url,pageViews.getOrDefault(url,0)+1);
 
-        for (int i = 0; i < words.length - 2; i++) {
-
-            String gram = words[i] + " " + words[i+1] + " " + words[i+2];
-
-            index.putIfAbsent(gram, new HashSet<>());
-            index.get(gram).add(docId);
-        }
+        uniqueVisitors.putIfAbsent(url,new HashSet<>());
+        uniqueVisitors.get(url).add(user);
     }
 
-    int checkSimilarity(String text) {
+    void dashboard(){
 
-        String[] words = text.split(" ");
-        int matches = 0;
-
-        for (int i = 0; i < words.length - 2; i++) {
-
-            String gram = words[i] + " " + words[i+1] + " " + words[i+2];
-
-            if (index.containsKey(gram))
-                matches++;
-        }
-
-        return matches;
+        System.out.println("Page Views: "+pageViews);
+        System.out.println("Unique Visitors: "+uniqueVisitors);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args){
 
-        PlagiarismDetector p = new PlagiarismDetector();
+        Analytics a = new Analytics();
 
-        p.indexDocument("doc1", "this is a sample plagiarism test");
+        a.processEvent("/news","user1");
+        a.processEvent("/news","user2");
+        a.processEvent("/sports","user3");
 
-        System.out.println("Matching n-grams: " +
-                p.checkSimilarity("this is a sample test"));
+        a.dashboard();
     }
 }
